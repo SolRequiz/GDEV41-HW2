@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <iostream>
 /*just in case*/    
 
 int FPS = 30;
@@ -15,12 +16,12 @@ void StartTimer(Timer *timer, double lifetime)
 
 bool UpdateTimer(Timer timer)
 {
-    return GetTime() - timer.startTime >= timer.lifeTime;
+    return GetTime() - timer.startTime;
 }
 
 double TimerDone(Timer timer)
 {
-    return GetTime() - timer.startTime;
+    return GetTime() - timer.startTime >= timer.lifeTime;
 }
 
 //g++ pewpewpewpew.cpp -o out -I src/ -L raylib/ -lraylib -lopengl32 -lgdi32 -lwinmm
@@ -38,20 +39,28 @@ int main(){
         float speed;
         int direction; //1 up, 2 left, 3 down, 4 right
         bool isShot;
+
         Timer shield;
         float shield_life;
+
+        Timer expansion;
+        float expansion_time;
     };
     Circle shield;
     shield.shield ={ 0 };
-    shield.shield_life = 1.0f;
+    shield.shield_life = 5.0f;
+    shield.expansion = { 0 };
+    shield.expansion_time = 0.5f;
+    shield.color = YELLOW;
+    shield.radius = 0;
 
     Circle player;
     player.x = 250;
     player.y = 250;
-    player.radius = 75;
+    player.radius = 30;
     player.color = GRAY;
-     player.speed = 10;
-     player.direction=0;//1 up, 2 left, 3 down, 4 right, 5 down right, 6 down left, 7 up right, 8 up left
+    player.speed = 10;
+    player.direction=0; //1 up, 2 left, 3 down, 4 right, 5 down right, 6 down left, 7 up right, 8 up left
     player.isShot=false;
 
     Circle bullet;
@@ -118,14 +127,22 @@ int main(){
                  bullet.direction=8;
             }
         }
-        if(IsKeyPressed(KEY_SPACE)){
-            StartTimer(&shield.shield,shield.shield_life);
+        if(IsKeyPressed(KEY_SPACE) && TimerDone(shield.shield)){
+            StartTimer(&shield.shield, shield.shield_life);
+            StartTimer(&shield.expansion, shield.expansion_time);
+            shield.x = player.x;
+            shield.y = player.y;
         }
-        UpdateTimer(&shield.shield);
+        UpdateTimer(shield.shield);
+        UpdateTimer(shield.expansion);
 
-        if(!TimerDone(&shield.shield)){
-
+        if(!TimerDone(shield.expansion)){
+            shield.radius += 2.5;
         }
+        else if(TimerDone(shield.expansion) && (shield.radius > 0)){
+            shield.radius -= 2.5;
+        }
+
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
             bullet.isShot=true;
 
@@ -223,10 +240,9 @@ int main(){
         BeginDrawing();
         ClearBackground(WHITE);
         
-
         DrawCircle(player.x, player.y, player.radius, player.color);
         DrawCircle(bullet.x,bullet.y,bullet.radius,bullet.color);
-
+        DrawCircle(shield.x, shield.y, shield.radius, shield.color);
         /*the bullet is there i just didn't draw it yet*/
         EndDrawing();
     }
