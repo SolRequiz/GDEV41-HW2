@@ -13,12 +13,12 @@ void StartTimer(Timer *timer, double lifetime)
     timer->lifeTime = lifetime;
 }
 
-bool TimerDone(Timer timer)
+bool UpdateTimer(Timer timer)
 {
     return GetTime() - timer.startTime >= timer.lifeTime;
 }
 
-double GetElapsed(Timer timer)
+double TimerDone(Timer timer)
 {
     return GetTime() - timer.startTime;
 }
@@ -38,7 +38,13 @@ int main(){
         float speed;
         int direction; //1 up, 2 left, 3 down, 4 right
         bool isShot;
+        Timer shield;
+        float shield_life;
     };
+    Circle shield;
+    shield.shield ={ 0 };
+    shield.shield_life = 1.0f;
+
     Circle player;
     player.x = 250;
     player.y = 250;
@@ -113,7 +119,12 @@ int main(){
             }
         }
         if(IsKeyPressed(KEY_SPACE)){
-            
+            StartTimer(&shield.shield,shield.shield_life);
+        }
+        UpdateTimer(&shield.shield);
+
+        if(!TimerDone(&shield.shield)){
+
         }
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
             bullet.isShot=true;
