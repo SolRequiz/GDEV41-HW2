@@ -1,5 +1,4 @@
-#include <raylib.h>
-/*just in case*/    
+#include <raylib.h>  
 
 const float FPS = 30;
 
@@ -80,7 +79,6 @@ int main(){
 
     float accumulator = 0;
     while(!WindowShouldClose()){
-        /*feel free to change values once we add fps*/
         if(IsKeyDown(KEY_W)){
             player.y -= player.speed;
             if(bullet.isShot==false){
@@ -250,7 +248,6 @@ int main(){
         DrawCircle(player.x, player.y, player.radius, player.color);
         DrawCircle(bullet.x,bullet.y,bullet.radius,bullet.color);
         DrawCircle(shield.x, shield.y, shield.radius, shield.color);
-        /*the bullet is there i just didn't draw it yet*/
         EndDrawing();
     }
 
