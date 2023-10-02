@@ -1,8 +1,8 @@
 #include <raylib.h>
-#include <iostream>
 /*just in case*/    
 
-int FPS = 30;
+const float FPS = 30;
+
 typedef struct Timer {
     double startTime;   // Start time (seconds)
     double lifeTime;    // Lifetime (seconds)
@@ -39,12 +39,15 @@ int main(){
         float speed;
         int direction; //1 up, 2 left, 3 down, 4 right
         bool isShot;
-
+        
         Timer shield;
         float shield_life;
 
         Timer expansion;
         float expansion_time;
+
+        Timer bullet;
+        float bullet_cooldown;
     };
     Circle shield;
     shield.shield ={ 0 };
@@ -69,10 +72,13 @@ int main(){
     bullet.y = player.y;
     bullet.radius = 10;
     bullet.color = BLUE;
-    bullet.speed =20;
-    bullet.direction=0;
+    bullet.speed = 20;
+    bullet.direction = 1;
     bullet.isShot = false;
+    bullet.bullet = { 0 };
+    bullet.bullet_cooldown = 1.0f;
 
+    float accumulator = 0;
     while(!WindowShouldClose()){
         /*feel free to change values once we add fps*/
         if(IsKeyDown(KEY_W)){
@@ -95,7 +101,7 @@ int main(){
         if(IsKeyDown(KEY_D)){
             player.x += player.speed;
             if(bullet.isShot==false){
-                 bullet.direction=4;
+                bullet.direction=4;
             }
         }
         //double keypressed
@@ -130,73 +136,75 @@ int main(){
         if(IsKeyPressed(KEY_SPACE) && TimerDone(shield.shield)){
             StartTimer(&shield.shield, shield.shield_life);
             StartTimer(&shield.expansion, shield.expansion_time);
-            shield.x = player.x;
-            shield.y = player.y;
         }
         UpdateTimer(shield.shield);
         UpdateTimer(shield.expansion);
 
         if(!TimerDone(shield.expansion)){
+            shield.x = player.x;
+            shield.y = player.y;
             shield.radius += 2.5;
         }
         else if(TimerDone(shield.expansion) && (shield.radius > 0)){
+            shield.x = player.x;
+            shield.y = player.y;
             shield.radius -= 2.5;
         }
 
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && TimerDone(bullet.bullet)){
             bullet.isShot=true;
-
+            StartTimer(&bullet.bullet, bullet.bullet_cooldown);
             }
             if(bullet.isShot==true){
                 bullet.color=BLUE;
                 if(bullet.direction==8){
-                        if(bullet.x>=0){
+                    if(bullet.x>=0){
                         bullet.x -= bullet.speed;
                         bullet.y -= bullet.speed;
                         bullet.direction=8;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
                 if(bullet.direction==7){
-                        if(bullet.x<=GetScreenWidth()){
+                    if(bullet.x<=GetScreenWidth()){
                         bullet.x += bullet.speed;
                         bullet.y -= bullet.speed;
                         bullet.direction=7;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
                 if(bullet.direction==6){
-                        if(bullet.x>=0){
+                    if(bullet.x>=0){
                         bullet.x -= bullet.speed;
                         bullet.y += bullet.speed;
                         bullet.direction=6;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
                 if(bullet.direction==5){
-                        if(bullet.x<=GetScreenWidth()){
+                    if(bullet.x<=GetScreenWidth()){
                         bullet.x += bullet.speed;
                         bullet.y += bullet.speed;
                         bullet.direction=5;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
 
-                 if(bullet.direction==4){
-                        if(bullet.x<=GetScreenWidth()){
+                if(bullet.direction==4){
+                    if(bullet.x<=GetScreenWidth()){
                         bullet.x += bullet.speed;
                         bullet.direction=4;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
 
                 }
@@ -206,7 +214,7 @@ int main(){
                         bullet.direction=3;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
                 
@@ -216,7 +224,7 @@ int main(){
                         bullet.direction=2;
                     }
                     else{
-                     bullet.isShot=false;
+                        bullet.isShot=false;
                 }
                 }
                 
@@ -235,10 +243,9 @@ int main(){
                 bullet.x=player.x;
                 bullet.color=player.color;
             }
-           
         
         BeginDrawing();
-        ClearBackground(WHITE);
+        ClearBackground(BLACK);
         
         DrawCircle(player.x, player.y, player.radius, player.color);
         DrawCircle(bullet.x,bullet.y,bullet.radius,bullet.color);
